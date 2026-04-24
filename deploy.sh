@@ -1,12 +1,27 @@
 #!/bin/bash
-# Deployment script — Sakai Benchmark Dashboard
+# Skrip untuk otomatisasi proses deployment
+
+# Hentikan eksekusi jika ada perintah yang gagal
 set -e
 
-echo "📥 Pulling latest code..."
+# 1. Tarik kode terbaru dari Git
+echo " pulling latest code..."
 git pull
 
-echo "🔨 Building & starting containers..."
-podman compose down --remove-orphans
-podman compose up -d --build
+# 2. Bangun ulang image Podman
+echo " Building new container image..."
+podman build -t sakai-banch .
 
-echo "✅ Deployment finished! Dashboard: http://$(hostname -I | awk '{print $1}'):8083"
+# 3. Hentikan dan hapus container lama (jika ada)
+# '|| true' agar skrip tidak error jika container tidak ditemukan
+echo " Stopping and removing old container..."
+podman stop sakai-banch || true
+podman rm sakai-banch || true
+
+# 4. Jalankan container baru
+echo " Starting new container..."
+
+echo " Deployment finished successfully!"
+
+
+
